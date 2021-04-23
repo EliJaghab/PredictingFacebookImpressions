@@ -1,0 +1,178 @@
+---
+title: "HW3_CSC_8491_Jaghab"
+author: "Eli Jaghab"
+This file will try to predict the number of lifetime impressions a Facebook post will get
+---
+---
+a. Read raw csv file in
+---
+```{r}
+posts <- read.csv2(file = "/Users/eli/Desktop/Data\ Mining\ and\ DB\ Programming/facebook_posts.csv")
+```
+---
+b. Remove rows with "Photo" in the Type Column
+---
+```{r}
+posts <- posts[posts$Type == "Photo",]
+```
+---
+c. Remove Type Column, the Total.Interactions column, and any column with Lifetime in its title, except for Lifetime.Post.Total.Impressions (which will be designated as the target variable) (9 columns will be removed)
+---
+```{r}
+# Remove Type and Total.Interactions
+posts <- subset(posts, select = -c(Type, Total.Interactions))
+```
+
+```{r}
+#Store Target Column in Separate Variable 
+target <- data.frame(posts["Lifetime.Post.Total.Impressions"])
+```
+
+```{r}
+# Remove all Columns with Lifetime in its title
+posts <- posts[, -grep("Lifetime", colnames(posts))]
+```
+
+```{r}
+# Add back Target Column (Lifetime.Post.Total.Impressions)
+posts['Lifetime.Post.Total.Impressions'] <- target
+```
+---
+e. Use summary function to view posts data frame
+---
+```{r}
+summary(posts)
+```
+---
+f. Fit a linear model to predict total impressions
+---
+```{r}
+#create a linear model
+lm.all_predictors <- lm(formula = Lifetime.Post.Total.Impressions ~ ., data = posts)
+```
+---
+g. Show summary of linear model
+---
+```{r}
+summary(lm.all_predictors)
+```
+---
+h. Based on the p-values and significance codes you see in the model, which predictor variables have such a strong apparent relationship with the target variable that the chances of these variables having no real connection to the target variable are less than 5%? (p-values of less than 0.05.) List those variables here.
+In ascending order:
+1. like (1.64e-06)
+2. share (0.00535)
+3. Category (0.01048)
+---
+
+---
+i. Based on your lm.all_predictors model, how much would you expect each like to impact the value of Lifetime.Post.Total.Impressions? Will each like increase or decrease the target value? 
+
+Each like will increase the Lifetime.Post.Total.Impressions by 128.5 impressions
+
+---
+
+---
+j. How much of the variation in Lifetime.Post.Total.Impressions does your lm.all_predictors model explain? (Hint: Look at R-squared for the model.)
+
+16.09% of the variance found in the response variable can be explained by the predictor variables (this is low)
+---
+
+---
+k. Create a new linear model to predict total impressions from just the likes variable
+---
+
+```{r}
+#create a linear model
+lm.like <- lm(data = posts, formula = Lifetime.Post.Total.Impressions ~ like)
+
+```
+
+---
+l. Use summary to to see characteristics
+---
+
+```{r}
+summary(lm.like)
+```
+
+---
+m. Based on your lm.like model, how much would you expect each like to impact the value of Lifetime.Post.Total.Impressions? Will each like increase or decrease the target value? By how much? Again, make sure you express the “how much” as a decimal value.
+
+Each like will increase the Lifetime.Post.Total.Impressions by 81.40 impressions
+---
+---
+
+n. How much of the variation in Lifetime.Post.Total.Impressions does your lm.like model explain? Does it explain more or less than lm.all_predictors?
+
+11.82% of the variance found can be explained by the model. It explains less than the lm.all_predictors model
+---
+---
+o. Create a scatterplot of posts that shows Lifetime.Post.Total.Impressions and like on the same graph. Plot the line for your lm.like model on that graph. Paste the graph here.
+---
+
+```{r}
+plot(posts$like, posts$Lifetime.Post.Total.Impressions, xlab = "Total Number of Likes", ylab = "Post's Lifetime Total Impressions", main = "Total Impressions Against Likes")
+abline(lm.like, col ="red")
+```
+
+---
+p. Now, considering posts with the following characteristics:
+
+Page.total.likes:100000 
+Category:1
+Post.Month:10
+Post.Weekday:7
+Post.Hour:13
+Paid:1
+comment:48
+like:2019
+share:144
+---
+
+```{r}
+custom = data.frame(Page.total.likes = 100000, Category = 1, Post.Month = 10, Post.Weekday = 7, Post.Hour = 13, Paid = 1, comment = 48, like = 2019, share = 144)
+```
+
+---
+q. Using your lm.all_predictors model, show the interval in which the mean Lifetime.Post.Total.Impressions for all such posts will fall with 95% confidence.
+---
+
+```{r}
+predict(lm.all_predictors, custom, interval="predict")
+```
+# The 95% prediction interval of the model of these characteristics is between 162737.7 and 326971.7 impressions.
+
+---
+q. Now assume a single post having the characteristics mentioned in the previous step. Using your lm.all_predictors model, predict the number of Lifetime.Post.Total.Impressions this post will get (i.e., fit), and determine the minimum number of Lifetime.Post.Total.Impressions you would expect this post to get (with 95% confidence). 
+
+The number of lifetime impressions this post will get is 244854.7 impressions. The minimum amount of impressions it is expected to get is 162737.7 impressions.
+---
+---
+r. Again, assume a single post with all the same characteristics listed in step p, except that it has a like value of 2020. Using your lm.all_predictors model, show your best prediction (fit) for its Lifetime.Post.Total.Impressions. How does this value compare to the value you predicted in the previous step? Does the difference in the prediction make sense based on what you know about the lm.all_predictors model? Explain your answer.
+---
+
+```{r}
+custom2 = data.frame(Page.total.likes = 100000, Category = 1, Post.Month = 10, Post.Weekday = 7, Post.Hour = 13, Paid = 1, comment = 48, like = 2020, share = 144)
+```
+
+
+```{r}
+predict(lm.all_predictors, custom2, interval="confidence")
+```
+
+
+#The number of lifetime impressions this post will get is 244983.2 (244854.7 prev) impressions. The minimum amount of impressions it is expected to get is 162830.2 (162737.7 prev) impressions. The fit value is slightly larger and this is explained by the model because as there are more likes in an instance, there are more impressions. There is a direct relationship between these two values. 
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
